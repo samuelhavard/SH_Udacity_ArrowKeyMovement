@@ -3,6 +3,7 @@ package com.udacity.gamedev.inputtestbed;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
@@ -12,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.Random;
 
 
-public class BouncingBall {
+public class BouncingBall extends InputAdapter {
 
     private static final Color COLOR = Color.RED;
     private static final float DRAG = 1.0f;
@@ -32,11 +33,14 @@ public class BouncingBall {
     Vector2 position;
     Vector2 velocity;
 
+    Viewport viewport;
+
     public BouncingBall(Viewport viewport) {
-        init(viewport);
+        this.viewport = viewport;
+        init();
     }
 
-    public void init(Viewport viewport) {
+    public void init() {
         position = new Vector2(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2);
         velocity = new Vector2();
         radiusMultiplier = 1;
@@ -51,13 +55,13 @@ public class BouncingBall {
         velocity.y = KICK_VELOCITY * MathUtils.sin(angle);
     }
 
-    public void update(float delta, Viewport viewport) {
+    public void update(float delta) {
 
         // Growing and shrinking
-        if (Gdx.input.isKeyPressed(Keys.Z)){
+        if (Gdx.input.isKeyPressed(Keys.Z)) {
             radiusMultiplier += delta * RADIUS_GROWTH_RATE;
         }
-        if (Gdx.input.isKeyPressed(Keys.X)){
+        if (Gdx.input.isKeyPressed(Keys.X)) {
             radiusMultiplier -= delta * RADIUS_GROWTH_RATE;
             radiusMultiplier = Math.max(radiusMultiplier, MIN_RADIUS_MULTIPLIER);
         }
@@ -65,12 +69,12 @@ public class BouncingBall {
         radius = radiusMultiplier * BASE_RADIUS;
 
         // TODO: Subtract delta * ACCELERATION from velocity.x if the left arrow key is pressed (Hint: Keys.LEFT)
-        if(Gdx.input.isKeyPressed(Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Keys.LEFT)) {
             velocity.x -= delta * ACCELERATION;
         }
 
         // TODO: Handle Keys.RIGHT
-        if(Gdx.input.isKeyPressed(Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             velocity.x += delta * ACCELERATION;
         }
 
@@ -96,6 +100,7 @@ public class BouncingBall {
         collideWithWalls(radius, viewport.getWorldWidth(), viewport.getWorldHeight());
     }
 
+
     private void collideWithWalls(float radius, float viewportWidth, float viewportHeight) {
         if (position.x - radius < 0) {
             position.x = radius;
@@ -119,5 +124,17 @@ public class BouncingBall {
         renderer.set(ShapeType.Filled);
         renderer.setColor(COLOR);
         renderer.circle(position.x, position.y, radius);
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        if (keycode == Keys.SPACE) {
+            randomKick();
+        }
+
+        if (keycode == Keys.R) {
+            init();
+        }
+        return true;
     }
 }
